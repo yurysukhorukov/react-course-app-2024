@@ -1,6 +1,5 @@
 import { CourseCard } from './components/CourseCard/CourseCard';
 import {
-	mockedAuthorsList,
 	mockedCoursesList,
 	formatTime,
 	formatDate,
@@ -8,15 +7,20 @@ import {
 } from '../../constants';
 import { Button } from '../../common/Button/Button';
 import { Link } from 'react-router-dom';
+import { EmptyCourseList } from '../EmptyCourseList/EmptyCourseList';
 
-export const Courses = (props) => {
+export const Courses = () => {
 	return (
 		<div className={'courses'}>
-			<ul>
-				{generateCourses().map((course) => (
-					<li key={course.props.id}>{course}</li>
-				))}
-			</ul>
+			{mockedCoursesList.length === 0 ? (
+				<EmptyCourseList />
+			) : (
+				<ul>
+					{generateCourses().map((course) => (
+						<li key={course.props.id}>{course}</li>
+					))}
+				</ul>
+			)}
 			<Link to={'/courses/add'}>
 				<Button buttonText='ADD NEW COURSE' />
 			</Link>
