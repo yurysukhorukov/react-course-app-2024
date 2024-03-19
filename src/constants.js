@@ -47,3 +47,31 @@ export const mockedAuthorsList = [
 		name: 'Valentina Larina',
 	},
 ];
+
+export const formatTime = (totalMinutes) => {
+	const hours = Math.floor(totalMinutes / 60);
+	const minutes = totalMinutes % 60;
+	const hourHours = hours === 1 ? ' hour' : ' hours';
+	return addLeadingZero(hours) + ':' + addLeadingZero(minutes) + hourHours;
+};
+
+export const formatDate = (date) => {
+	return (
+		addLeadingZero(date.getDate()) +
+		'.' +
+		addLeadingZero(date.getMonth()) +
+		'.' +
+		date.getFullYear()
+	);
+};
+
+export const generateMockedCourseAuthors = (course) => {
+	return mockedAuthorsList
+		.filter((a) => course.authors.includes(a.id))
+		.map((a) => a.name)
+		.join(', ');
+};
+
+function addLeadingZero(number) {
+	return ('0' + number).slice(-2);
+}

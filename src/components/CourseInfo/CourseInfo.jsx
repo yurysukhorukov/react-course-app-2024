@@ -1,32 +1,38 @@
-import { Courses } from '../Courses/Courses';
-import { useState } from 'react';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { Button } from '../../common/Button/Button';
 
-export const CourseInfo = (props) => {
-	const [toggle, setToggle] = useState(false);
+export const CourseInfo = () => {
+	const params = useParams();
+	const location = useLocation();
+	//is that ok to pass props like this?
+	const props = location.state.props;
 
-	return toggle === true ? (
-		<Courses />
-	) : (
-		<div className={'courseInfo'}>
-			<title>{props.title}</title>
-			<p>{props.description}</p>
-			<p className={'id'}>
-				<b>ID: </b>
-				{props.id}
-			</p>
-			<p className={'duration'}>
-				<b>Duration: </b>
-				{props.duration}
-			</p>
-			<p className={'creationDate'}>
-				<b>Created: </b>
-				<time>{props.creationDate}</time>
-			</p>
-			<p className={'authors'}>
-				<b>Authors: </b>
-				{props.authors}
-			</p>
-			<button onClick={() => setToggle(!toggle)}>BACK</button>
-		</div>
+	return (
+		<>
+			<h2>Course id that came from URL is {params.courseId}</h2>
+			<div className={'courseInfo'}>
+				<h2>{props.title}</h2>
+				<p>{props.description}</p>
+				<p className={'id'}>
+					<b>ID: </b>
+					{params.courseId}
+				</p>
+				<p className={'duration'}>
+					<b>Duration: </b>
+					{props.duration}
+				</p>
+				<p className={'creationDate'}>
+					<b>Created: </b>
+					<time>{props.creationDate}</time>
+				</p>
+				<p className={'authors'}>
+					<b>Authors: </b>
+					{props.authors}
+				</p>
+				<Link to='/courses'>
+					<Button buttonText='BACK' />
+				</Link>
+			</div>
+		</>
 	);
 };

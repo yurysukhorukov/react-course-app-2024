@@ -1,12 +1,25 @@
 import { Header } from './components/Header/Header';
 import { Courses } from './components/Courses/Courses';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { Login } from './components/Login/Login';
+import { Registration } from './components/Registration/Registration';
+import { CourseInfo } from './components/CourseInfo/CourseInfo';
+import { CreateCourse } from './components/CreateCourse/CreateCourse';
 
 function App() {
 	return (
-		<div>
+		<>
 			<Header />
-			<Courses />
-		</div>
+			<Routes>
+				<Route path='*' element={<Navigate to='/' />} />
+				<Route path='/' element={<Courses />} />
+				<Route path='/login' element={<Login />} />
+				<Route path='/registration' element={<Registration />} />
+				<Route path='/courses/:courseId' element={<CourseInfo />} />
+				<Route path='/courses' element={<Courses />} />
+				<Route path='/courses/add' element={<CreateCourse />} />
+			</Routes>
+		</>
 	);
 }
 
