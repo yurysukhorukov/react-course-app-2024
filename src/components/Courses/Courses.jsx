@@ -3,6 +3,7 @@ import { mockedAuthorsList, mockedCoursesList } from '../../constants';
 import { Button } from '../../common/Button/Button';
 import { useState } from 'react';
 import { CourseInfo } from '../CourseInfo/CourseInfo';
+import { EmptyCourseList } from '../EmptyCourseList/EmptyCourseList';
 
 export const Courses = (props) => {
 	const [toggle, setToggle] = useState(false);
@@ -41,7 +42,11 @@ export const Courses = (props) => {
 		/>
 	) : (
 		<div className={'courses'}>
-			<ul>{generateCourses(mockedCoursesList, mockedAuthorsList)}</ul>
+			{mockedCoursesList.length === 0 ? (
+				<EmptyCourseList />
+			) : (
+				<ul>{generateCourses(mockedCoursesList, mockedAuthorsList)}</ul>
+			)}
 			<Button buttonText='ADD NEW COURSE' />
 		</div>
 	);
