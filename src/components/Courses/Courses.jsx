@@ -1,18 +1,35 @@
 import { CourseCard } from './components/CourseCard/CourseCard';
 import {
-	mockedCoursesList,
-	formatTime,
+	AUTHORS_ALL,
+	COURSES_ALL,
 	formatDate,
-	generateMockedCourseAuthors,
+	formatTime,
 } from '../../constants';
 import { Button } from '../../common/Button/Button';
 import { Link } from 'react-router-dom';
 import { EmptyCourseList } from '../EmptyCourseList/EmptyCourseList';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { getAllCourses } from '../../store/courses/actions';
+import { getAllAuthors } from '../../store/authors/actions';
 
 export const Courses = () => {
+	const { courses, authors } = useSelector((state) => state);
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		fetch(COURSES_ALL)
+			.then((response) => response.json())
+			.then((data) => dispatch(getAllCourses(data.result)));
+
+		fetch(AUTHORS_ALL)
+			.then((response) => response.json())
+			.then((data) => dispatch(getAllAuthors(data.result)));
+	}, [dispatch]);
+
 	return (
 		<div className={'courses'}>
-			{mockedCoursesList.length === 0 ? (
+			{courses.length === 0 ? (
 				<EmptyCourseList />
 			) : (
 				<ul>
@@ -29,7 +46,7 @@ export const Courses = () => {
 
 	function generateCourses() {
 		let courseCardList = [];
-		for (const course of mockedCoursesList) {
+		for (const course of courses) {
 			const courseAuthors = generateMockedCourseAuthors(course);
 			courseCardList.push(
 				<CourseCard
@@ -43,5 +60,12 @@ export const Courses = () => {
 			);
 		}
 		return courseCardList;
+	}
+
+	function generateMockedCourseAuthors(course) {
+		return authors
+			.filter((a) => course.authors.includes(a.id))
+			.map((a) => a.name)
+			.join(', ');
 	}
 };

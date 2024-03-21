@@ -1,12 +1,24 @@
 import { Input } from '../../common/Input/Input';
 import { useEffect, useState } from 'react';
-import { formatDate, formatTime, mockedAuthorsList } from '../../constants';
+import {
+	AUTHORS_ALL,
+	COURSE_ADD,
+	formatDate,
+	formatTime,
+	HARDCODED_EMAIL,
+} from '../../constants';
 import { Button } from '../../common/Button/Button';
 import { AuthorItem } from './components/AuthorItem/AuthorItem';
 import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { addCourseAction } from '../../store/courses/actions';
+import { getAllAuthors } from '../../store/authors/actions';
 
-export const CreateCourse = (props) => {
+export const CreateCourse = () => {
+	const { authors } = useSelector((state) => state);
+	const dispatch = useDispatch();
+
 	const navigate = useNavigate();
 	const [title, setTitle] = useState('');
 	const [description, setDescription] = useState('');
@@ -21,12 +33,15 @@ export const CreateCourse = (props) => {
 	const [authorNameError, setAuthorNameError] = useState(false);
 
 	useEffect(() => {
-		setAuthorsList(
-			mockedAuthorsList.sort((a, b) => a.name.localeCompare(b.name))
-		);
-		setCourseAuthorsList([]);
-	}, []);
+		fetch(AUTHORS_ALL)
+			.then((response) => response.json())
+			.then((data) => dispatch(getAllAuthors(data.result)));
+	}, [dispatch]);
 
+	useEffect(() => {
+		setAuthorsList(authors.sort((a, b) => a.name.localeCompare(b.name)));
+		setCourseAuthorsList([]);
+	}, [authors]);
 	const convertToHours = (timeInMinutes) => {
 		setDurationValue(timeInMinutes);
 		setDurationInHours(formatTime(timeInMinutes));
@@ -85,13 +100,30 @@ export const CreateCourse = (props) => {
 				id: uuidv4(),
 				title: title,
 				description: description,
-				creationDate: formatDate(new Date()),
 				duration: durationValue,
-				authors: [...courseAuthorsList],
+				authors: [...courseAuthorsList.map((author) => author.id)],
 			};
 
-			console.log('New course created');
-			console.log(newCourse.toString());
+			const token = localStorage.getItem(HARDCODED_EMAIL);
+			fetch(COURSE_ADD, {
+				method: 'POST',
+				headers: {
+					'Content-type': 'application/json',
+					Authorization: token,
+				},
+				body: JSON.stringify(newCourse),
+			})
+				.then((response) => {
+					if (response.successful) return response.json();
+					return response.json().then((response) => {
+						throw new Error(response.message);
+					});
+				})
+				.then((data) => dispatch(addCourseAction(data.result)))
+				.catch((err) => console.log('caught' + err.message));
+
+			console.log('course added');
+			navigate('/courses');
 		} else {
 			setTitleError(true);
 			setDescriptionError(true);
