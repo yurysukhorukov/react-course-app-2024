@@ -5,7 +5,6 @@ export const AUTHORS = 'http://localhost:4000/authors';
 export const LOGIN_URL = 'http://localhost:4000/login';
 export const AUTHORS_ADD = 'http://localhost:4000/authors/add';
 export const COURSE_ADD = 'http://localhost:4000/courses/add';
-export const HARDCODED_EMAIL = 'admin@email.com';
 export const token = localStorage.getItem('token');
 
 export const formatTime = (totalMinutes) => {
