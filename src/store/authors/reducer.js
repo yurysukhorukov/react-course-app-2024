@@ -5,7 +5,7 @@ import {
 	SAVE_AUTHOR,
 } from './types';
 
-export const authorsInitialState = [];
+const authorsInitialState = [];
 export const authorsReducer = (authors = authorsInitialState, action) => {
 	switch (action.type) {
 		case GET_ALL_AUTHORS:

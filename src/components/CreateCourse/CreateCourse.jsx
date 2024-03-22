@@ -1,11 +1,11 @@
 import { Input } from '../../common/Input/Input';
 import { useEffect, useState } from 'react';
 import {
+	AUTHORS_ADD,
 	AUTHORS_ALL,
 	COURSE_ADD,
-	formatDate,
 	formatTime,
-	HARDCODED_EMAIL,
+	token,
 } from '../../constants';
 import { Button } from '../../common/Button/Button';
 import { AuthorItem } from './components/AuthorItem/AuthorItem';
@@ -13,10 +13,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCourseAction } from '../../store/courses/actions';
-import { getAllAuthors } from '../../store/authors/actions';
+import { addAuthorAction, getAllAuthors } from '../../store/authors/actions';
+import { getAuthors } from '../../selectors';
 
 export const CreateCourse = () => {
-	const { authors } = useSelector((state) => state);
+	const authors = useSelector(getAuthors);
 	const dispatch = useDispatch();
 
 	const navigate = useNavigate();
@@ -39,7 +40,7 @@ export const CreateCourse = () => {
 	}, [dispatch]);
 
 	useEffect(() => {
-		setAuthorsList(authors.sort((a, b) => a.name.localeCompare(b.name)));
+		setAuthorsList([...authors].sort((a, b) => a.name.localeCompare(b.name)));
 		setCourseAuthorsList([]);
 	}, [authors]);
 	const convertToHours = (timeInMinutes) => {
@@ -47,38 +48,37 @@ export const CreateCourse = () => {
 		setDurationInHours(formatTime(timeInMinutes));
 	};
 
-	const createAuthor = async (e) => {
-		e.preventDefault();
-
+	const createAuthor = async () => {
 		if (authorName) {
-			const authorId = uuidv4();
 			const newAuthor = {
 				name: authorName,
 			};
 
 			try {
-				const response = await fetch(
-					`http://localhost:4000/authors/${authorId}`,
-					{
-						method: 'PUT',
-						body: JSON.stringify(newAuthor),
-						headers: {
-							'Content-Type': 'application/json',
-						},
-					}
-				);
+				const response = await fetch(AUTHORS_ADD, {
+					method: 'POST',
+					body: JSON.stringify(newAuthor),
+					headers: {
+						'Content-type': 'application/json',
+						Authorization: token,
+					},
+				});
 
-				const result = await response.json();
-				if (result.successful) {
-					console.log(`Author ${authorName} was added`);
+				if (!response.ok) {
+					const errorResponse = await response.json();
+					throw new Error(errorResponse.errors);
 				}
-			} catch (e) {
-				alert(e);
+
+				const data = await response.json();
+				dispatch(addAuthorAction(data.result));
+
+				setAuthorName('');
+			} catch (err) {
+				console.error('Error: ', err.message);
 			}
 		} else {
 			setAuthorNameError(true);
 		}
-		console.log('Creating author...' + authorName);
 	};
 
 	const removeFromCourseAuthors = (author) => {
@@ -104,7 +104,6 @@ export const CreateCourse = () => {
 				authors: [...courseAuthorsList.map((author) => author.id)],
 			};
 
-			const token = localStorage.getItem(HARDCODED_EMAIL);
 			fetch(COURSE_ADD, {
 				method: 'POST',
 				headers: {
@@ -114,15 +113,14 @@ export const CreateCourse = () => {
 				body: JSON.stringify(newCourse),
 			})
 				.then((response) => {
-					if (response.successful) return response.json();
+					if (response.ok) return response.json();
 					return response.json().then((response) => {
-						throw new Error(response.message);
+						throw new Error(response.errors);
 					});
 				})
 				.then((data) => dispatch(addCourseAction(data.result)))
-				.catch((err) => console.log('caught' + err.message));
+				.catch((err) => console.error('caught' + err.message));
 
-			console.log('course added');
 			navigate('/courses');
 		} else {
 			setTitleError(true);
@@ -168,7 +166,7 @@ export const CreateCourse = () => {
 						id='duration'
 						label='Duration'
 						onChange={(e) => {
-							convertToHours(e.target.value);
+							convertToHours(parseInt(e.target.value));
 							setDurationValueError(false);
 						}}
 					/>
@@ -183,6 +181,7 @@ export const CreateCourse = () => {
 						type='text'
 						id='authorName'
 						label='Author Name'
+						value={authorName}
 						onChange={(e) => {
 							setAuthorName(e.target.value);
 							setAuthorNameError(false);

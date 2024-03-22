@@ -6,16 +6,28 @@ import {
 	formatTime,
 } from '../../constants';
 import { Button } from '../../common/Button/Button';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { EmptyCourseList } from '../EmptyCourseList/EmptyCourseList';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { getAllCourses } from '../../store/courses/actions';
 import { getAllAuthors } from '../../store/authors/actions';
+import moment from 'moment';
+import { selectCoursesAndAuthors } from '../../selectors';
+import { getUserAction } from '../../store/user/actions';
 
 export const Courses = () => {
-	const { courses, authors } = useSelector((state) => state);
+	const { courses, authors } = useSelector(selectCoursesAndAuthors);
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
+
+	useEffect(() => {
+		const token = localStorage.getItem('token');
+
+		if (!token) {
+			navigate('/login');
+		}
+	});
 
 	useEffect(() => {
 		fetch(COURSES_ALL)
@@ -55,7 +67,9 @@ export const Courses = () => {
 					description={course.description}
 					authors={courseAuthors}
 					duration={formatTime(course.duration)}
-					creationDate={formatDate(new Date(course.creationDate))}
+					creationDate={formatDate(
+						moment(course.creationDate, 'DD/MM/YYYY').toDate()
+					)}
 				/>
 			);
 		}
@@ -63,7 +77,7 @@ export const Courses = () => {
 	}
 
 	function generateMockedCourseAuthors(course) {
-		return authors
+		return [...authors]
 			.filter((a) => course.authors.includes(a.id))
 			.map((a) => a.name)
 			.join(', ');

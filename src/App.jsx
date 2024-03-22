@@ -5,8 +5,18 @@ import { Login } from './components/Login/Login';
 import { Registration } from './components/Registration/Registration';
 import { CourseInfo } from './components/CourseInfo/CourseInfo';
 import { CreateCourse } from './components/CreateCourse/CreateCourse';
+import { useEffect, useState } from 'react';
 
 function App() {
+	// const [buttonText, setButtonText] = useState('Login');
+	//
+	// useEffect(() => {
+	// 	const token = localStorage.getItem('token');
+	// 	if (token) {
+	// 		setButtonText('Logout');
+	// 	}
+	// }, []);
+
 	return (
 		<>
 			<Header />

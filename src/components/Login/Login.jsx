@@ -1,45 +1,61 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../common/Button/Button';
 import { Input } from '../../common/Input/Input';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { LOGIN_URL, token } from '../../constants';
+import { useDispatch } from 'react-redux';
+import { loginUserAction } from '../../store/user/actions';
 
 export const Login = () => {
+	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [emailError, setEmailError] = useState(false);
 	const [passwordError, setPasswordError] = useState(false);
 
+	useEffect(() => {
+		const token = localStorage.getItem('token');
+
+		if (token) {
+			navigate('/courses');
+		}
+	}, [navigate]);
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
-		// Check if all fields are not empty
 		if (email && password) {
-			// All fields are filled, proceed with registration logic
 			const newUser = {
 				password: password,
 				email: email,
 			};
 
-			const response = await fetch('http://localhost:4000/login', {
-				method: 'POST',
-				body: JSON.stringify(newUser),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
+			try {
+				const response = await fetch(LOGIN_URL, {
+					method: 'POST',
+					body: JSON.stringify(newUser),
+					headers: {
+						'Content-type': 'application/json',
+						Authorization: token,
+					},
+				});
 
-			const result = await response.json();
-			if (result.successful) {
-				localStorage.setItem(email, result.result);
+				if (!response.ok) {
+					const errorResponse = await response.json();
+					throw new Error(errorResponse.errors);
+				}
+
+				const data = await response.json();
+				dispatch(loginUserAction(data));
+				localStorage.setItem('token', data.result);
+
 				console.log('Login successful');
 				navigate('/courses');
-			} else {
-				alert(result.errors);
+			} catch (err) {
+				console.error('Error: ', err.message);
 			}
 		} else {
-			// Not all fields are filled, display an error message or take appropriate action
 			console.log('Please fill in all fields');
-			// Set error state for empty fields
 			setEmailError(!email);
 			setPasswordError(!password);
 		}
