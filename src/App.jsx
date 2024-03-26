@@ -5,29 +5,29 @@ import { Login } from './components/Login/Login';
 import { Registration } from './components/Registration/Registration';
 import { CourseInfo } from './components/CourseInfo/CourseInfo';
 import { CreateCourse } from './components/CreateCourse/CreateCourse';
-import { useEffect, useState } from 'react';
+import { token } from './constants';
 
 function App() {
-	// const [buttonText, setButtonText] = useState('Login');
-	//
-	// useEffect(() => {
-	// 	const token = localStorage.getItem('token');
-	// 	if (token) {
-	// 		setButtonText('Logout');
-	// 	}
-	// }, []);
-
 	return (
 		<>
 			<Header />
 			<Routes>
 				<Route path='*' element={<Navigate to='/' />} />
-				<Route path='/' element={<Courses />} />
+				<Route path='/' element={<Navigate to='/courses' />} />
 				<Route path='/login' element={<Login />} />
 				<Route path='/registration' element={<Registration />} />
-				<Route path='/courses/:courseId' element={<CourseInfo />} />
-				<Route path='/courses' element={<Courses />} />
-				<Route path='/courses/add' element={<CreateCourse />} />
+				<Route
+					path='/courses/:courseId'
+					element={token ? <CourseInfo /> : <Navigate to='/login' />}
+				/>
+				<Route
+					path='/courses'
+					element={token ? <Courses /> : <Navigate to='/login' />}
+				/>
+				<Route
+					path='/courses/add'
+					element={token ? <CreateCourse /> : <Navigate to='/login' />}
+				/>
 			</Routes>
 		</>
 	);
